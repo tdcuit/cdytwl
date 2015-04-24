@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<constant name="struts.i18n.encoding" value="GB18030"/>
+	<package name="struts2" extends="struts-default" namespace="/">
+		<action name="userinfo" class="userAction">
+			<result name="DELETEUSERFAILED">error.jsp</result>
+			<result name="LISTUSERS">userinfo/listUser.jsp</result>
+			<result name="FINDUSERFORUPDATESUCESS">userinfo/editUser.jsp</result>
+			<result name="FINDUSERFORUPDATEFAILED">index.jsp</result>
+			<result name="LOGINFAILED">index.jsp</result>
+			<result name="UPDATEUSERFAILED">index.jsp</result>
+		</action>
+		<action name="pic" class="picAction">
+			<result name="UPLOADFAILED">/error.jsp</result>
+			<result name="UPLOADSUCCESS">/pic/uploadSuccess.jsp</result>
+		</action>
+	</package>
+
+</struts>

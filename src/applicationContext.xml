@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	
+	<!-- 引用各模块的spring配置文件 --> 
+	<!-- <import resource="applicationContext-userinfo.xml"></import> -->
+	           
+	<!-- 用注解方式注入bean -->
+	<!-- <context:annotation-config/> -->
+	<!-- <context:component-scan base-package="com.cdytwl"/> -->
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:orcl" />
+		<property name="username" value="cdytwl" />
+		<property name="password" value="cdytwl" />
+	</bean>
+	<!-- hibernate sessionFactory 创建 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.OracleDialect</prop>
+				<prop key="hibernate.connection.autocommit">true</prop>
+			</props>
+		</property>
+		<property name="mappingDirectoryLocations">  
+	        <list>  
+	            <value>classpath*:com/cdytwl/userinfo/domain</value>
+	            <value>classpath*:com/cdytwl/common/pic/domain</value>
+	            <value>classpath*:com/cdytwl/delivergoods/domain</value> 
+	            <value>classpath*:com/cdytwl/receiptgoods/domain</value>
+	            <value>classpath*:com/cdytwl/common/domain</value> 
+	        </list>  
+    	</property>
+	</bean>
+     <bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+     	<property name="sessionFactory" ref="sessionFactory"></property>
+     </bean>     
+     <!-- 事物配置 -->
+     <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+     	<property name="sessionFactory" ref="sessionFactory"></property>
+     </bean>
+     <tx:advice id="txAdvice" transaction-manager="transactionManager">
+     	<tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="edit*" propagation="REQUIRED" />
+            <tx:method name="remove*" propagation="REQUIRED" />
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="batchUpdate" propagation="REQUIRED" />
+        </tx:attributes>
+     </tx:advice>
+     <aop:config>
+     	<aop:pointcut expression="execution(public * com.cdytwl..*.dao.impl..*.*(..))" id="myPointcut"/>
+     	<aop:advisor advice-ref="txAdvice" pointcut-ref="myPointcut"/>
+     </aop:config>
+     
+    <bean id="userDaoImpl" class="com.cdytwl.userinfo.dao.impl.UserDaoImpl"> 
+    	<property name="sessionFactory" ref="sessionFactory"></property>  
+    </bean>
+     <bean id="userManager" class="com.cdytwl.userinfo.service.impl.UserManagerImpl">  
+        <property name="userDao" ref="userDaoImpl"></property>
+    </bean>
+     <bean name="userAction" class="com.cdytwl.userinfo.action.UserAction">
+     	<property name="userManager" ref="userManager"></property>
+	</bean>
+     
+     <bean id="picDao" class="com.cdytwl.common.pic.dao.impl.PicDaoImpl"> 
+    	<property name="sessionFactory" ref="sessionFactory"></property>  
+    </bean>
+     <bean id="picManager" class="com.cdytwl.common.pic.service.impl.PicManagerImpl">  
+        <property name="picDao" ref="picDao"></property>
+    </bean>
+     <bean name="picAction" class="com.cdytwl.common.pic.action.PicAction">
+     	<property name="picManager" ref="picManager"></property>
+	</bean>
+     
+</beans>
